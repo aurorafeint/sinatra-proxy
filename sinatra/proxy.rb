@@ -5,7 +5,7 @@ require 'git'
 require 'rails_best_practices'
 require 'typhoeus'
 
-RAILSBP_CONFIG = YAML.load_file(File.join(File.dirname(__FILE__), '..', 'config', 'railsbp.yml'))
+RAILSBP_CONFIG = YAML.load_file(File.join(File.dirname(__FILE__), '..', 'config', 'railsbp.yml'))[ENV['RACK_ENV']]
 
 class Sinatra::Proxy < Sinatra::Base
   post RAILSBP_CONFIG["hook_path"] do

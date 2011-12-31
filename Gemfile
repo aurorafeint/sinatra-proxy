@@ -6,5 +6,7 @@ gem "git"
 gem "rails_best_practices"
 gem "typhoeus"
 
-gem "rack-test"
-gem "webmock"
+group :test do
+  gem "rack-test"
+  gem "webmock"
+end

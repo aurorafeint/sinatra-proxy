@@ -1,3 +1,5 @@
+ENV['RACK_ENV'] = 'test'
+
 require 'sinatra/proxy'
 require 'test/unit'
 require 'rack/test'

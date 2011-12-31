@@ -1,5 +1,13 @@
-token: "1234567890"
-branch: "master"
-hook_path: "/"
-build_path: "/Users/flyerhzm/Sites/railsbp/sinatra-proxy"
-github_name: "railsbp/rails-bestpractices.com"
+production:
+  token: "1234567890"
+  branch: "master"
+  hook_path: "/"
+  build_path: "/home/huangzhi/src/sinatra-proxy"
+  github_name: "railsbp/rails-bestpractices.com"
+
+test:
+  token: "1234567890"
+  branch: "master"
+  hook_path: "/"
+  build_path: "/home/huangzhi/src/sinatra-proxy"
+  github_name: "railsbp/rails-bestpractices.com"
