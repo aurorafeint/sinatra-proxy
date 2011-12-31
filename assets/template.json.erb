@@ -1,0 +1,13 @@
+<%- size = @errors.size %>
+{
+  "errors":[
+    <%- @errors.each_with_index do |error, index| %>
+    {
+      "type": "<%= error.type %>"
+      "short_filename": "<%= error.short_filename %>",
+      "line_number": "<%= error.line_number %>",
+      "message": "<%= error.message %>"
+    }<%= "," unless index == size - 1 %>
+    <%- end %>
+  ]
+}
