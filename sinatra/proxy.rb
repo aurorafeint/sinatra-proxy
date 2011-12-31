@@ -32,13 +32,22 @@ class Sinatra::Proxy < Sinatra::Base
       rails_best_practices.output
       FileUtils.rm_rf(analyze_path)
 
-      Typhoeus::Request.post("http://railsbp.com/sync_proxy", :params => {:token => RAILSBP_CONFIG["token"], :json => File.read(output_file)})
+      Typhoeus::Request.post("http://railsbp.com/sync_proxy", :params => request_params(payload).merge({:result => File.read(output_file)}))
       "success"
     rescue => e
+      puts e.message
       FileUtils.rm_rf(analyze_path) if File.exist?(analyze_path)
-      Typhoeus::Request.post("http://railsbp.com/sync_proxy", :params => {:token => RAILSBP_CONFIG["token"], :json => JSON.generate({:error => e.inspect})})
+      Typhoeus::Request.post("http://railsbp.com/sync_proxy", :params => request_params(payload).merge({:error => e.inspect}))
       "failure"
     end
+  end
+
+  def request_params(payload)
+    {
+      :token => RAILSBP_CONFIG["token"],
+      :repository_url => payload["repository"]["url"],
+      :last_commit => payload["commits"].last
+    }
   end
 
   def build_path
