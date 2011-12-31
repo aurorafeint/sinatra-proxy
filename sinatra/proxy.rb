@@ -46,7 +46,8 @@ class Sinatra::Proxy < Sinatra::Base
     {
       :token => RAILSBP_CONFIG["token"],
       :repository_url => payload["repository"]["url"],
-      :last_commit => payload["commits"].last
+      :last_commit => payload["commits"].last,
+      :ref => payload["ref"]
     }
   end
 
