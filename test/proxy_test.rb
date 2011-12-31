@@ -11,7 +11,7 @@ class Sinatra::ProxyTest < Test::Unit::TestCase
   end
 
   def setup
-    stub_http_request(:post, "http://railsbp/com/sync_proxy")
+    stub_http_request(:post, "http://railsbp.com/sync_proxy")
   end
 
   def test_hook_without_token
