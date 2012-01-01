@@ -37,7 +37,7 @@ class Sinatra::Proxy < Sinatra::Base
     rescue => e
       puts e.message
       FileUtils.rm_rf(analyze_path) if File.exist?(analyze_path)
-      Typhoeus::Request.post("http://railsbp.com/sync_proxy", :params => request_params(payload).merge({:error => e.inspect}))
+      Typhoeus::Request.post("http://railsbp.com/sync_proxy", :params => request_params(payload).merge({:error => Marshal::dump(e)}))
       "failure"
     end
   end
