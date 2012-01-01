@@ -4,6 +4,7 @@ require 'sinatra/proxy'
 require 'test/unit'
 require 'rack/test'
 require 'webmock/test_unit'
+require 'mocha'
 
 class Sinatra::ProxyTest < Test::Unit::TestCase
   include Rack::Test::Methods
@@ -31,9 +32,16 @@ class Sinatra::ProxyTest < Test::Unit::TestCase
     assert_equal "skip", last_response.body
   end
 
-  def test_hook
+  def test_hook_success
     post "/", :token => "1234567890", :payload => payload_body.sub("develop", "master")
     assert_equal "success", last_response.body
+  end
+
+  def test_hook_failure
+    payload = JSON.parse(payload_body)
+    Git.expects(:clone).returns(Exception.new("test"))
+    post "/", :token => "1234567890", :payload => JSON.generate(payload).sub("develop", "master")
+    assert_equal "failure", last_response.body
   end
 
   def payload_body

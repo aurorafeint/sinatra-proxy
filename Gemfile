@@ -9,4 +9,5 @@ gem "typhoeus"
 group :test do
   gem "rack-test"
   gem "webmock"
+  gem "mocha"
 end
