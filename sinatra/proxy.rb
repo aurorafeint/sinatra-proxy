@@ -32,7 +32,7 @@ class Sinatra::Proxy < Sinatra::Base
       rails_best_practices.output
       FileUtils.rm_rf(analyze_path)
 
-      Typhoeus::Request.post("http://railsbp.com/sync_proxy", :params => request_params(payload).merge({:result => File.read(output_file)}))
+      Typhoeus::Request.post("https://railsbp.com/sync_proxy", :params => request_params(payload).merge({:result => File.read(output_file)}))
       "success"
     rescue => e
       puts e.message
