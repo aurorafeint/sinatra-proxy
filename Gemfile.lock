@@ -8,6 +8,7 @@ GEM
     crack (0.3.1)
     erubis (2.7.0)
     git (1.2.5)
+    haml (3.1.4)
     i18n (0.6.0)
     json (1.6.1)
     metaclass (0.0.1)
@@ -33,6 +34,10 @@ GEM
       rack (~> 1.3, >= 1.3.6)
       rack-protection (~> 1.2)
       tilt (~> 1.3, >= 1.3.3)
+    slim (1.0.4)
+      temple (~> 0.3.4)
+      tilt (~> 1.3.2)
+    temple (0.3.4)
     tilt (1.3.3)
     typhoeus (0.3.3)
       mime-types
@@ -45,10 +50,12 @@ PLATFORMS
 
 DEPENDENCIES
   git
+  haml
   json
   mocha
   rack-test
   rails_best_practices
   sinatra
+  slim
   typhoeus
   webmock

@@ -5,6 +5,8 @@ gem "json"
 gem "git"
 gem "rails_best_practices"
 gem "typhoeus"
+gem "haml"
+gem "slim"
 
 group :test do
   gem "rack-test"
