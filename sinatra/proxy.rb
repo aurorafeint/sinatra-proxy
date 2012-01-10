@@ -3,14 +3,15 @@ require 'json'
 require 'sinatra/base'
 require 'git'
 require 'rails_best_practices'
-require 'typhoeus'
 require 'logger'
+require 'net/http'
+require 'net/https'
 
 RAILSBP_CONFIG = YAML.load_file(File.join(File.dirname(__FILE__), '..', 'config', 'railsbp.yml'))[ENV['RACK_ENV']]
 
 class Sinatra::Proxy < Sinatra::Base
   configure do
-    LOGGER = Logger.new("logs/sinatra.log")
+    LOGGER = Logger.new("log/sinatra.log")
     enable :logging, :dump_errors
     set :raise_errors, true
   end
@@ -26,7 +27,7 @@ class Sinatra::Proxy < Sinatra::Base
 
       FileUtils.mkdir_p(build_path) unless File.exist?(build_path)
       FileUtils.cd(build_path)
-      g = Git.clone(repository_url, build_name)
+      g = Git.clone(repository_url, build_name, :depth => 10)
       Dir.chdir(analyze_path) { g.reset_hard(last_commit_id(payload)) }
       LOGGER.info "cloned"
       rails_best_practices = RailsBestPractices::Analyzer.new(analyze_path,
@@ -43,14 +44,21 @@ class Sinatra::Proxy < Sinatra::Base
       LOGGER.info "analyzed"
       FileUtils.rm_rf(analyze_path)
 
-      Typhoeus::Request.post("https://railsbp.com/sync_proxy", :params => request_params(payload).merge({:result => File.read(output_file)}))
+      send_request(payload, :result => File.read(output_file))
+      LOGGER.info "request sent"
       "success"
     rescue => e
       LOGGER.error e.message
       FileUtils.rm_rf(analyze_path) if File.exist?(analyze_path)
-      Typhoeus::Request.post("http://railsbp.com/sync_proxy", :params => request_params(payload).merge({:error => Marshal::dump(e)}))
+      send_request(payload, :error => Marshal::dump(e))
       "failure"
     end
+  end
+
+  def send_request(payload, extra_params)
+    http = Net::HTTP.new('railsbp.com', 443)
+    http.use_ssl = true
+    http.post("/sync_proxy", request_params(payload).merge(extra_params).map { |key, value| "#{key}=#{value}" }.join("&")
   end
 
   def request_params(payload)

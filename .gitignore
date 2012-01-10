@@ -1,4 +1,4 @@
 config/railsbp.yml
 build/
 output.json
-logs/
+log/
