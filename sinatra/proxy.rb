@@ -4,21 +4,31 @@ require 'sinatra/base'
 require 'git'
 require 'rails_best_practices'
 require 'typhoeus'
+require 'logger'
 
 RAILSBP_CONFIG = YAML.load_file(File.join(File.dirname(__FILE__), '..', 'config', 'railsbp.yml'))[ENV['RACK_ENV']]
 
 class Sinatra::Proxy < Sinatra::Base
+  configure do
+    LOGGER = Logger.new("logs/sinatra.log")
+    enable :logging, :dump_errors
+    set :raise_errors, true
+  end
+
   post RAILSBP_CONFIG["hook_path"] do
     begin
       return "not authenticate" unless RAILSBP_CONFIG["token"] == params[:token]
+      LOGGER.info "authenticated"
 
       payload = JSON.parse(params[:payload])
       return "skip" unless payload["ref"] =~ %r|#{RAILSBP_CONFIG["branch"]}$|
+      LOGGER.info "match branch"
 
       FileUtils.mkdir_p(build_path) unless File.exist?(build_path)
       FileUtils.cd(build_path)
       g = Git.clone(repository_url, build_name)
       Dir.chdir(analyze_path) { g.reset_hard(last_commit_id(payload)) }
+      LOGGER.info "cloned"
       rails_best_practices = RailsBestPractices::Analyzer.new(analyze_path,
                                                               "format"         => "html",
                                                               "silent"         => true,
@@ -30,12 +40,13 @@ class Sinatra::Proxy < Sinatra::Base
                                                              )
       rails_best_practices.analyze
       rails_best_practices.output
+      LOGGER.info "analyzed"
       FileUtils.rm_rf(analyze_path)
 
       Typhoeus::Request.post("https://railsbp.com/sync_proxy", :params => request_params(payload).merge({:result => File.read(output_file)}))
       "success"
     rescue => e
-      puts e.message
+      LOGGER.error e.message
       FileUtils.rm_rf(analyze_path) if File.exist?(analyze_path)
       Typhoeus::Request.post("http://railsbp.com/sync_proxy", :params => request_params(payload).merge({:error => Marshal::dump(e)}))
       "failure"
