@@ -42,7 +42,6 @@ class Sinatra::Proxy < Sinatra::Base
       rails_best_practices.analyze
       rails_best_practices.output
       LOGGER.info "analyzed"
-      FileUtils.rm_rf(analyze_path)
 
       send_request(payload, :result => File.read(output_file))
       LOGGER.info "request sent"
@@ -52,20 +51,22 @@ class Sinatra::Proxy < Sinatra::Base
       FileUtils.rm_rf(analyze_path) if File.exist?(analyze_path)
       send_request(payload, :error => Marshal::dump(e))
       "failure"
+    ensure
+      FileUtils.rm_rf(analyze_path)
     end
   end
 
   def send_request(payload, extra_params)
     http = Net::HTTP.new('railsbp.com', 443)
     http.use_ssl = true
-    http.post("/sync_proxy", request_params(payload).merge(extra_params).map { |key, value| "#{key}=#{value}" }.join("&")
+    http.post("/sync_proxy", request_params(payload).merge(extra_params).map { |key, value| "#{key}=#{value}" }.join("&"))
   end
 
   def request_params(payload)
     {
       :token => RAILSBP_CONFIG["token"],
       :repository_url => payload["repository"]["url"],
-      :last_commit => payload["commits"].last,
+      :last_commit => JSON.generate(payload["commits"].last),
       :ref => payload["ref"]
     }
   end
