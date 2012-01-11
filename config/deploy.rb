@@ -22,6 +22,7 @@ after "deploy:update_code", "config:init"
 namespace :config do
   task :init do
     run "ln -nfs #{shared_path}/config/railsbp.yml #{release_path}/config/railsbp.yml"
+    run "ln -nfs #{shared_path}/config/rails_best_practices.yml #{release_path}/config/rails_best_practices.yml"
   end
 end
 
@@ -29,6 +30,7 @@ namespace :deploy do
   task :start do ; end
   task :stop do ; end
   task :restart, :roles => :app, :except => { :no_release => true } do
+    cleanup
     run "#{try_sudo} touch #{File.join(current_path,'tmp','restart.txt')}"
   end
 end
