@@ -17,6 +17,7 @@ class Sinatra::Proxy < Sinatra::Base
   end
 
   post RAILSBP_CONFIG["hook_path"] do
+    LOGGER.info params.inspect
     begin
       return "not authenticate" unless RAILSBP_CONFIG["token"] == params[:token]
       LOGGER.info "authenticated"
@@ -30,7 +31,7 @@ class Sinatra::Proxy < Sinatra::Base
       g = Git.clone(repository_url, build_name, :depth => 10)
       Dir.chdir(analyze_path) { g.reset_hard(last_commit_id(payload)) }
       LOGGER.info "cloned"
-      FileUtils.cp("#{build_path}/#{build_name}/config/rails_best_practices.yml", "config")
+      FileUtils.cp("#{build_path}/config/rails_best_practices.yml", "#{analyze_path}/config/rails_best_practices.yml")
 
       rails_best_practices = RailsBestPractices::Analyzer.new(analyze_path,
                                                               "format"         => "html",
