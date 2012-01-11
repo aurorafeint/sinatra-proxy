@@ -30,6 +30,8 @@ class Sinatra::Proxy < Sinatra::Base
       g = Git.clone(repository_url, build_name, :depth => 10)
       Dir.chdir(analyze_path) { g.reset_hard(last_commit_id(payload)) }
       LOGGER.info "cloned"
+      FileUtils.cp("#{build_path}/#{build_name}/config/rails_best_practices.yml", "config")
+
       rails_best_practices = RailsBestPractices::Analyzer.new(analyze_path,
                                                               "format"         => "html",
                                                               "silent"         => true,
@@ -49,7 +51,7 @@ class Sinatra::Proxy < Sinatra::Base
     rescue => e
       LOGGER.error e.message
       FileUtils.rm_rf(analyze_path) if File.exist?(analyze_path)
-      send_request(payload, :error => Marshal::dump(e))
+      send_request(payload, :error => e.message)
       "failure"
     ensure
       FileUtils.rm_rf(analyze_path)
