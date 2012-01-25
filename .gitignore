@@ -1,4 +1,5 @@
 config/railsbp.yml
+config/rails_best_practices.yml
 build/
 output.json
 log/*.log
