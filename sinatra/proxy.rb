@@ -19,17 +19,18 @@ class Sinatra::Proxy < Sinatra::Base
   post RAILSBP_CONFIG["hook_path"] do
     LOGGER.info params.inspect
     begin
+      @payload = JSON.parse(params[:payload])
+
       return "not authenticate" unless RAILSBP_CONFIG["token"] == params[:token]
       LOGGER.info "authenticated"
 
-      payload = JSON.parse(params[:payload])
-      return "skip" unless payload["ref"] =~ %r|#{RAILSBP_CONFIG["branch"]}$|
+      return "skip" unless @payload["ref"] =~ %r|#{RAILSBP_CONFIG["branch"]}$|
       LOGGER.info "match branch"
 
       FileUtils.mkdir_p(build_path) unless File.exist?(build_path)
       FileUtils.cd(build_path)
-      g = Git.clone(repository_url, build_name, :depth => 10)
-      Dir.chdir(analyze_path) { g.reset_hard(last_commit_id(payload)) }
+      g = Git.clone(repository_url, build_name, depth: 10)
+      Dir.chdir(analyze_path) { g.reset_hard(last_commit_id) }
       LOGGER.info "cloned"
       FileUtils.cp("#{build_path}/config/rails_best_practices.yml", "#{analyze_path}/config/rails_best_practices.yml")
 
@@ -39,38 +40,38 @@ class Sinatra::Proxy < Sinatra::Base
                                                               "output-file"    => output_file,
                                                               "with-github"    => true,
                                                               "github-name"    => RAILSBP_CONFIG["github_name"],
-                                                              "last-commit-id" => last_commit_id(payload),
+                                                              "last-commit-id" => last_commit_id,
                                                               "template"       => template_file
                                                              )
       rails_best_practices.analyze
       rails_best_practices.output
       LOGGER.info "analyzed"
 
-      send_request(payload, :result => File.read(output_file))
+      send_request(:result => File.read(output_file))
       LOGGER.info "request sent"
       "success"
-    rescue => e
+    rescue Exception => e
       LOGGER.error e.message
       FileUtils.rm_rf(analyze_path) if File.exist?(analyze_path)
-      send_request(payload, :error => e.message)
+      send_request(:error => e.message)
       "failure"
     ensure
       FileUtils.rm_rf(analyze_path)
     end
   end
 
-  def send_request(payload, extra_params)
+  def send_request(extra_params)
     http = Net::HTTP.new('railsbp.com', 443)
     http.use_ssl = true
-    http.post("/sync_proxy", request_params(payload).merge(extra_params).map { |key, value| "#{key}=#{value}" }.join("&"))
+    http.post("/sync_proxy", request_params.merge(extra_params).map { |key, value| "#{key}=#{value}" }.join("&"))
   end
 
-  def request_params(payload)
+  def request_params
     {
       :token => RAILSBP_CONFIG["token"],
-      :repository_url => payload["repository"]["url"],
-      :last_commit => JSON.generate(payload["commits"].last),
-      :ref => payload["ref"]
+      :repository_url => @payload["repository"]["url"],
+      :last_commit => JSON.generate(@payload["commits"].last),
+      :ref => @payload["ref"]
     }
   end
 
@@ -79,11 +80,11 @@ class Sinatra::Proxy < Sinatra::Base
   end
 
   def build_name
-    "railsbp_build"
+    last_commit_id
   end
 
-  def last_commit_id(payload)
-    payload["commits"].last["id"]
+  def last_commit_id
+    @payload["commits"].last["id"]
   end
 
   def repository_url

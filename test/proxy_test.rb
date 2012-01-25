@@ -18,12 +18,12 @@ class Sinatra::ProxyTest < Test::Unit::TestCase
   end
 
   def test_hook_without_token
-    post "/"
+    post "/", :payload => payload_body
     assert_equal "not authenticate", last_response.body
   end
 
   def test_hook_with_wrong_token
-    post "/", :token => "9876543210"
+    post "/", :token => "9876543210", :payload => payload_body
     assert_equal "not authenticate", last_response.body
   end
 
@@ -33,6 +33,7 @@ class Sinatra::ProxyTest < Test::Unit::TestCase
   end
 
   def test_hook_success
+    Git::Base.any_instance.expects(:reset_hard).with("473d12b3ca40a38f12620e31725922a9d88b5386")
     post "/", :token => "1234567890", :payload => payload_body.sub("develop", "master")
     assert_equal "success", last_response.body
   end
