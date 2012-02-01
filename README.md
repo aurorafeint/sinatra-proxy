@@ -15,13 +15,13 @@ Usage
 Deployment
 ----------
 
-1. directly clone source codes
+** directly clone source codes **
 
     git clone git://github.com/railsbp/sinatra-proxy.git
 
 you should create config/railsbp.yml and config/rails_best_practices.yml according to the examples.
 
-2. with capistrano
+** with capistrano **
 
     capify .
 
