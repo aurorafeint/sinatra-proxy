@@ -1,8 +1,7 @@
 sinatra-proxy
 =============
 
-sinatra-proxy is a sinatra proxy for railsbp.com, it should be executed
-on ruby 1.9.2
+sinatra-proxy is a sinatra proxy for railsbp.com, it should be executed on ruby 1.9.2
 
 Usage
 -----
@@ -20,8 +19,7 @@ Deployment
 
     git clone git://github.com/railsbp/sinatra-proxy.git
 
-you should create shared/config/railsbp.yml and
-shared/config/rails_best_practices.yml according to the examples.
+you should create config/railsbp.yml and config/rails_best_practices.yml according to the examples.
 
 2. with capistrano
 
@@ -31,5 +29,12 @@ here is an example
 
     https://gist.github.com/1716458
 
-you should create shared/config/railsbp.yml and
-shared/config/rails_best_practices.yml according to the examples.
+setup on remote server
+
+    cap deploy:setup
+
+you should create shared/config/railsbp.yml and shared/config/rails_best_practices.yml on remote server according to the examples.
+
+finally
+
+    cap deploy
