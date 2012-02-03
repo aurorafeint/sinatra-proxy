@@ -53,7 +53,6 @@ class Sinatra::Proxy < Sinatra::Base
       "success"
     rescue Exception => e
       LOGGER.error e.message
-      FileUtils.rm_rf(analyze_path) if File.exist?(analyze_path)
       send_request(:error => e.message)
       "failure"
     ensure
