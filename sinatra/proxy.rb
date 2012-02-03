@@ -41,7 +41,7 @@ class Sinatra::Proxy < Sinatra::Base
                                                               "with-github"    => true,
                                                               "github-name"    => RAILSBP_CONFIG["github_name"],
                                                               "last-commit-id" => last_commit_id,
-                                                              "git"            => true,
+                                                              "with-git"       => true,
                                                               "template"       => template_file
                                                              )
       rails_best_practices.analyze
