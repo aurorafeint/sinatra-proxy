@@ -16,7 +16,7 @@ class Sinatra::Proxy < Sinatra::Base
     set :raise_errors, true
   end
 
-  post RAILSBP_CONFIG["hook_path"] do
+  post "/hook" do
     LOGGER.info params.inspect
     begin
       @payload = JSON.parse(params[:payload])
@@ -32,7 +32,7 @@ class Sinatra::Proxy < Sinatra::Base
       g = Git.clone(repository_url, build_name, depth: 10)
       Dir.chdir(analyze_path) { g.reset_hard(last_commit_id) }
       LOGGER.info "cloned"
-      FileUtils.cp("#{build_path}/config/rails_best_practices.yml", "#{analyze_path}/config/rails_best_practices.yml")
+      FileUtils.cp(config_file_path, "#{analyze_path}/config/rails_best_practices.yml")
 
       rails_best_practices = RailsBestPractices::Analyzer.new(analyze_path,
                                                               "format"         => "html",
@@ -41,6 +41,7 @@ class Sinatra::Proxy < Sinatra::Base
                                                               "with-github"    => true,
                                                               "github-name"    => RAILSBP_CONFIG["github_name"],
                                                               "last-commit-id" => last_commit_id,
+                                                              "git"            => true,
                                                               "template"       => template_file
                                                              )
       rails_best_practices.analyze
@@ -57,6 +58,12 @@ class Sinatra::Proxy < Sinatra::Base
       "failure"
     ensure
       FileUtils.rm_rf(analyze_path)
+    end
+  end
+
+  post "/configs" do
+    File.open(config_file_path, "w+") do |file|
+      file.write(params[:configs])
     end
   end
 
@@ -85,6 +92,10 @@ class Sinatra::Proxy < Sinatra::Base
 
   def last_commit_id
     @payload["commits"].last["id"]
+  end
+
+  def config_file_path
+    "#{build_path}/config/rails_best_practices.yml"
   end
 
   def repository_url
