@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/railsbp/rails_best_practices
-  revision: db4a4d40dd7153f5d3086017f57cb3299a2c4886
+  revision: 154cd033d6ce072599d22977d873b24649765404
   specs:
     rails_best_practices (1.7.2)
       activesupport
