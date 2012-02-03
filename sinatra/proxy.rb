@@ -29,7 +29,7 @@ class Sinatra::Proxy < Sinatra::Base
 
       FileUtils.mkdir_p(build_path) unless File.exist?(build_path)
       FileUtils.cd(build_path)
-      g = Git.clone(repository_url, build_name, depth: 10)
+      g = Git.clone(repository_url, build_name)
       Dir.chdir(analyze_path) { g.reset_hard(last_commit_id) }
       LOGGER.info "cloned"
       FileUtils.cp(config_file_path, "#{analyze_path}/config/rails_best_practices.yml")
@@ -41,7 +41,7 @@ class Sinatra::Proxy < Sinatra::Base
                                                               "with-github"    => true,
                                                               "github-name"    => RAILSBP_CONFIG["github_name"],
                                                               "last-commit-id" => last_commit_id,
-                                                              "git"            => true,
+                                                              "with-git"       => true,
                                                               "template"       => template_file
                                                              )
       rails_best_practices.analyze
@@ -53,7 +53,6 @@ class Sinatra::Proxy < Sinatra::Base
       "success"
     rescue Exception => e
       LOGGER.error e.message
-      FileUtils.rm_rf(analyze_path) if File.exist?(analyze_path)
       send_request(:error => e.message)
       "failure"
     ensure
