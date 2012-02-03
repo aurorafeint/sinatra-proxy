@@ -3,7 +3,7 @@ source "http://rubygems.org"
 gem "sinatra"
 gem "json"
 gem "git"
-gem "rails_best_practices"
+gem "rails_best_practices", :git => "git://github.com/railsbp/rails_best_practices"
 gem "haml"
 gem "slim"
 
