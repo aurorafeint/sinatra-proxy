@@ -16,7 +16,15 @@ class Sinatra::Proxy < Sinatra::Base
     set :raise_errors, true
   end
 
+  post "/" do
+    handle_github_hook
+  end
+
   post "/hook" do
+    handle_github_hook
+  end
+
+  def handle_github_hook
     LOGGER.info params.inspect
     begin
       @payload = JSON.parse(params[:payload])
