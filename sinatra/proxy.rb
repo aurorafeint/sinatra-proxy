@@ -5,7 +5,6 @@ require 'git'
 require 'rails_best_practices'
 require 'logger'
 require 'net/http'
-require 'net/https'
 
 RAILSBP_CONFIG = YAML.load_file(File.join(File.dirname(__FILE__), '..', 'config', 'railsbp.yml'))[ENV['RACK_ENV']]
 
@@ -75,8 +74,7 @@ class Sinatra::Proxy < Sinatra::Base
   end
 
   def send_request(extra_params)
-    http = Net::HTTP.new('railsbp.com', 443)
-    http.use_ssl = true
+    http = Net::HTTP.new('railsbp.com', 80)
     http.post("/sync_proxy", request_params.merge(extra_params).map { |key, value| "#{key}=#{value}" }.join("&"))
   end
 

@@ -14,7 +14,7 @@ class Sinatra::ProxyTest < Test::Unit::TestCase
   end
 
   def setup
-    stub_http_request(:post, "https://railsbp.com/sync_proxy")
+    stub_http_request(:post, "http://railsbp.com/sync_proxy")
   end
 
   def test_hook_without_token
@@ -39,7 +39,7 @@ class Sinatra::ProxyTest < Test::Unit::TestCase
   end
 
   def test_hook_failure
-    Git.expects(:clone).raises(Exception, "test")
+    Git::Base.any_instance.expects(:reset_hard).raises(Exception, "test")
     post "/hook", :token => "1234567890", :payload => payload_body.sub("develop", "master")
     assert_equal "failure", last_response.body
   end
